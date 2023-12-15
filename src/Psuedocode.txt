@@ -1,0 +1,121 @@
+------------------------------------------------------------------------------------------
+(FCFS)
+
+[p1]: arrival=1 | burst=2
+[p2]: arrival=2 | burst=3
+[p3]: arrival=0 | burst=1
+
+sort processes array, p, by arrival                                             // [p3],[p1],[p2]
+{current time}=0 
+loop p with index i
+    {current time} += max(p[i].{arrival time} - {current time}, 0) + p[i].{burst time}  // 0 , 1 , 3
+    p[i].{completed time} = {current time}                                              // 1 , 3 , 6
+    p[i].{turnaround} = {current time} - p[i].{arrival time}
+    p[i].{wait time} = p[i].{turnaround} - p[i].{burst time}
+
+
+ [p3],[p1],[p2]
+0    1    3    6
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+(R-R)
+
+{time quantum} = 1
+[p1]: arrival=0  | burst=2
+[p2]: arrival=1  | burst=5
+[p3]: arrival=2  | burst=3
+[p4]: arrival=12 | burst=1
+
+sort processes into stack, p, by arrival // [p1],[p2],[p3],[p4]
+{current time} = p.front.{arrival time} // can be 0, but this is a cool ass optimization brought to you by PhantomEyes™
+create ready queue q with p.pop // q: [p1] p: [p2],[p3],[p4]
+while !p.empty
+{
+    while !q.empty
+    {
+        e = q.pop
+
+        if e.{remaining burst time} <= {time quantum}
+            {current time} += e.{remaining burst time}
+            e.{turnaround} = e.{current time} - e.{arrival time}
+            e.{wait time} = e.{turnaround} - e.{burst time}
+        else
+            {current time} += {time quantum}
+
+        while p !empty and p.front.{arrival time} <= {current time}
+            q.push p.pop
+
+        e.{remaining burst time} -= {time quantum}
+        if e.{remaining burst time} > 0
+            q.push e
+    }
+
+    if p.front.{arrival time} <= {current time}
+        q.push p.pop 
+    else
+        {current time} += 1
+}
+
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+(SJF - Non Preemtive)
+
+[p1]: arrival=0 | burst=4
+[p2]: arrival=1 | burst=2
+[p3]: arrival=2 | burst=1
+
+
+sort processes array, p, by burst // [p3],[p2],[p1]
+{current time}=0
+while (p !empty)
+{
+    loop p with index i
+    {
+        if (p[i].{arrival time} <= {current time})                          // 0, 4, 5
+            {current time} += p[i].{burst time}                                  // 4, 5, 7
+            p[i].{completed time} = {current time}                          // 4, 5, 7
+            p[i].{turnaround} = {current time} - p[i].{arrival time}         // 4, 3, 6
+            p[i].{wait time} = p[i].{turnaround} - p[i].{burst time}        // 0, 2, 4
+            remove p[i] from p
+            i = 0
+    }
+    {current time} += 1
+}
+
+
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+(SJF - Preemtive)
+
+[p1]: arrival=0 | burst=4
+[p2]: arrival=1 | burst=2
+[p3]: arrival=2 | burst=1
+
+
+sort processes array, p, by burst // [p3],[p2],[p1]
+{current time}=0
+while (p !empty)
+{
+    loop p with index i
+    {
+        if (p[i].{arrival time} <= {current time})                              // 0, 1, 2, 3, 4->6
+            {current time} += 1                                                 // 1, 2, 3, 4, 5->7
+            p[i].{remaining burst time} -= 1                                    // [p1]=3, [p2]= 1, [p3]= 0, [p2]= 0, [p1]= 2->0
+            if p[i].{remaining burst time} == 0
+                p[i].{completed time} = {current time}                          // 3, 4, 7
+                p[i].{turnaround} = {current time} - p[i].{arrival time}   // 1, 3, 7
+                p[i].{wait time} = p[i].{turnaround} - p[i].{burst time}        // 0, 1, 3
+                remove p[i] from p
+            i = 0
+    }
+    {current time} += 1
+}
+
+
+------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+(Priority - Preemtive)
+
+[p1]: arrival=0 | burst=3 | priority=
+[p2]: arrival=1 | burst=4 | priority=
+[p3]: arrival=2 | burst=3 | priority=
