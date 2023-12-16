@@ -100,6 +100,7 @@ function roundRobin(processes, quantum) {
         gantt.push({ id: -1, time: currentTime });
       }
   }
+  console.log(processes);
   return [processes, gantt];
 }
 
@@ -229,9 +230,12 @@ function priorityNonPreemptive(processes) {
         processes[i].turnAround = currentTime - processes[i].arrivalTime;
         processes[i].waitTime =
           processes[i].turnAround - processes[i].burstTime;
+        gantt.push({
+          id: processes[i].processId,
+          time: currentTime,
+        });
         processes.splice(i, 1);
         found = true;
-        gantt.push({ id: processes[i].id, time: currentTime });
         break;
       }
     }
@@ -250,7 +254,7 @@ function App() {
   const [arrivalTime, setArrivalTime] = useState();
   const [burstTime, setBurstTime] = useState();
   const [priority, setPriority] = useState();
-  const [quantum, setQuantum] = useState(1);
+  const [quantum, setQuantum] = useState("");
   const [results, setResults] = useState([]);
   const [breaks, setBreaks] = useState([]);
   const { theme, setTheme } = useTheme();
@@ -307,7 +311,9 @@ function App() {
             <select
               className="text-black rounded-xs p-1"
               onChange={(e) => {
-                // setProcesses([]);
+                setProcesses([]);
+                setResults([]);
+                setBreaks([]);
                 setSelectedAlgorithm(e.target.value);
               }}
             >
@@ -318,10 +324,15 @@ function App() {
             {algorithms[selectedAlgorithm].quantum && (
               <input
                 value={quantum}
-                onChange={(e) => setQuantum(Number(e.target.value))}
+                onChange={(e) => {
+                  const newInput = Number(e.target.value);
+                  if (newInput && newInput > 0) setQuantum(newInput);
+                  else setQuantum(0);
+                }}
                 className={inputClasses}
                 placeholder="Time Quantum"
                 type="number"
+                min={"0"}
               ></input>
             )}
             <button
@@ -346,31 +357,51 @@ function App() {
           <input
             className={inputClasses}
             value={processId}
-            onChange={(e) => setProcessId(Number(e.target.value))}
+            onChange={(e) => {
+              const newInput = Number(e.target.value);
+              if (newInput && newInput > 0) setProcessId(newInput);
+              else setProcessId(0);
+            }}
             placeholder="Process ID"
             type="number"
+            min={"0"}
           />
           <input
             className={inputClasses}
             value={arrivalTime}
-            onChange={(e) => setArrivalTime(Number(e.target.value))}
+            onChange={(e) => {
+              const newInput = Number(e.target.value);
+              if (newInput && newInput > 0) setArrivalTime(newInput);
+              else setArrivalTime(0);
+            }}
             placeholder="Arrival Time"
             type="number"
+            min={"0"}
           />
           <input
             className={inputClasses}
             value={burstTime}
-            onChange={(e) => setBurstTime(Number(e.target.value))}
+            onChange={(e) => {
+              const newInput = Number(e.target.value);
+              if (newInput && newInput > 0) setBurstTime(newInput);
+              else setBurstTime(0);
+            }}
             placeholder="Burst Time"
             type="number"
+            min={"0"}
           />
           {algorithms[selectedAlgorithm].priority && (
             <input
               className={inputClasses}
               value={priority}
-              onChange={(e) => setPriority(Number(e.target.value))}
+              onChange={(e) => {
+                const newInput = Number(e.target.value);
+                if (newInput && newInput > 0) setPriority(newInput);
+                else setPriority(0);
+              }}
               placeholder="Priority"
               type="number"
+              min={"0"}
             ></input>
           )}
 
